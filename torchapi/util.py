@@ -6,7 +6,7 @@ def _response_builder(res: str) -> dict:
     return {"response": res}
 
 
-def _get_image(req):
+def _get_image_obj(req):
     image_base64 = req["image"]
     encoding_regex = re.search(r"^data:image/(png|jpg|gif);base64,(.+)$", image_base64)
     if not encoding_regex:

@@ -2,7 +2,7 @@ import base64
 import json
 import re
 
-from .services import _banknote
+from .services_interface import _banknote
 from .util import _response_builder
 
 
