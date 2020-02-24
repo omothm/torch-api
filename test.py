@@ -9,9 +9,8 @@ def main():
     request = {"request": "banknote", "image": image_base64}
     request_json = json.dumps(request)
     response = handle(request_json)
-    print(response["response"])
+    print(response)
 
 
 if __name__ == "__main__":
     main()
-
