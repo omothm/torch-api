@@ -25,7 +25,7 @@ def _response_builder(status="ok", **kwargs) -> dict:
     return response
 
 
-def _error_response(origin: str, msg: str):
+def _error_response(origin: str, msg: str) -> dict:
     """Convenience wrapper around `_response_builder` for errors."""
     return _response_builder(status="error", error_origin=origin, error_message=msg)
 

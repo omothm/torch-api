@@ -17,4 +17,5 @@ unknown_service = _error_response(origin="server", msg="Unknown service")
 def handle(req: str) -> str:
     jsonstr = json.loads(req)
     func = services.get(jsonstr["request"], lambda _: unknown_service)
-    return func(jsonstr)
+    response_json = func(jsonstr)  # dict
+    return str(response_json)
