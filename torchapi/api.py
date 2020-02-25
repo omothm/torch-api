@@ -19,8 +19,8 @@ _SERVICES = {
     "banknote": BanknoteService()
 }
 
+_UNKNOWN_SERVICE_ERROR = error_response(origin="server", msg="Unknown service")
 
-unknown_service = _error_response(origin="server", msg="Unknown service")
 
 
 def handle(req: str) -> str:
