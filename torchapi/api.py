@@ -22,8 +22,14 @@ _SERVICES = {
 _UNKNOWN_SERVICE_ERROR = error_response(origin="server", msg="Unknown service")
 
 
-
 def handle(req: str) -> str:
+    """Accepts a JSON request (string) that is assumed to be conforming to the
+    specification defined in the Torch API documentation, and returns a JSON
+    response (string) from the requested service if it exists.
+
+    If the request cannot be processed for any reason, an error response is
+    returned.
+    """
     jsonstr = json.loads(req)
     service = _SERVICES.get(jsonstr["request"])
     if not service:

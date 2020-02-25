@@ -1,18 +1,17 @@
-import datetime
-import base64
-import re
+"""Torch utilities
 
-from .exceptions import TorchException
+Helper functions for the API.
+"""
 
+__author__ = "Omar Othman"
 
 import datetime
 
 
 def response_builder(status="ok", **kwargs) -> dict:
     """Ensures the format of the response is valid according to docs.
-    Returns
-    =======
-    A `dict` containing the response JSON."""
+    ### Returns
+    a `dict` containing the response JSON."""
     response = {}
     response["status"] = status
     response["time"] = str(datetime.datetime.now())
