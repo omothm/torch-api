@@ -2,6 +2,34 @@
 
 <img alt="v0.1.0" src="https://img.shields.io/badge/v-0.1.0-brightgreen">
 
+## Usage
+
+Example usage:
+
+```python
+from torchapi.api import handle
+
+request =
+  """
+  {
+    "request": "banknote",
+    "image": "data:image/png;base64,iVBORw0KGg..."
+  }
+  """
+response = handle(request)
+print(response)
+```
+
+Example output:
+
+```json
+{
+  "status": "ok",
+  "time": "2020-02-25 19:50:53.833346",
+  "response": 100
+}
+```
+
 ## Contract
 
 ### Request
@@ -16,9 +44,9 @@
 `"<IMAGE_BASE64>"` is a base-64 encoding of the image that will be analyzed. The
 image must be **224px by 224px** and contain **RGB** channels.
 
-The contents must adhere to the following regex:
+The contents of the base-64 string must adhere to the following regex:
 
-    ^data:image/(png|jpg|gif);base64,(.+)$
+    ^data:image(/(.*))?;base64,(.+)$
 
 ### Response
 
@@ -51,6 +79,8 @@ In the case of error, the response is sent as follows:
   "error_message": "<ERROR_MESSAGE>"
 }
 ```
+
+Some of the errors and their meaning:
 
 | Error message          | Origin   | Reason                                                                  |
 | ---------------------- | -------- | ----------------------------------------------------------------------- |
