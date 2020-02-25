@@ -1,4 +1,12 @@
-import base64
+"""Torch API
+
+Handles JSON requests and returns JSON responses as defined in Torch API
+documentation.
+"""
+
+__author__ = "Omar Othman"
+
+
 import json
 
 from .exceptions import TorchException
