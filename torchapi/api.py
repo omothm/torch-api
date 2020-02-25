@@ -1,13 +1,14 @@
 import base64
 import json
-import re
 
-from .services_interface import _banknote
-from .util import _error_response
+from .exceptions import TorchException
+from .services.banknote import BanknoteService
+from .util import error_response, response_builder
 
 
-services = {
-    "banknote": _banknote
+# service instances defined here should live as long as the session
+_SERVICES = {
+    "banknote": BanknoteService()
 }
 
 
@@ -16,6 +17,11 @@ unknown_service = _error_response(origin="server", msg="Unknown service")
 
 def handle(req: str) -> str:
     jsonstr = json.loads(req)
-    func = services.get(jsonstr["request"], lambda _: unknown_service)
-    response_json = func(jsonstr)  # dict
-    return str(response_json)
+    service = _SERVICES.get(jsonstr["request"])
+    if not service:
+        return _UNKNOWN_SERVICE_ERROR
+    try:
+        prediction = service.predict(jsonstr)
+    except TorchException as exception:
+        return error_response(origin=exception.origin, msg=str(exception))
+    return response_builder(response=prediction)
