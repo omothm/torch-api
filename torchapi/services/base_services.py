@@ -5,6 +5,8 @@ Classes representing common functionalities for services.
 
 __author__ = "Emre Bicer; Omar Othman"
 
+import os
+import random
 import numpy as np
 
 from keras.models import load_model
@@ -12,7 +14,11 @@ from keras.preprocessing import image
 
 from .common import asset_file, temp_file, base64_to_image_obj
 from ..exceptions import TorchException
-from ..logger import log_i
+from ..logger import log_e, log_i
+
+# alphanumeric population for random name generator
+_POPULATION = list(map(chr, list(range(48, 58)) + list(range(65, 91)) + list(range(97, 123))))
+_RANDOM_STRING_LENGTH = 64
 
 
 class Service:
@@ -37,39 +43,37 @@ class KerasCnnImageService(Service):
 
     `model_filename`: name of model file to load from the assets directory.
     Default is `model.h5`.
-
-    `temp_image_filename`: name of file, used to temporarily save the image
-    being processed, to load from the temp directory. Default is `image`.
     """
 
     def __init__(self, service_name, class_map: dict = None,
-                 model_filename: str = "model.h5", temp_image_filename: str = "image"):
+                 model_filename: str = "model.h5"):
         super().__init__(service_name)
         self.class_map = class_map
         self.model_filename = asset_file(self.service_name, model_filename)
-        self.temp_image_filename = temp_file(
-            self.service_name, temp_image_filename)
-        self.model = None
+        try:
+            self.model = load_model(self.model_filename)
+            log_i(self.service_name, "Model loaded")
+        except:
+            log_e(self.service_name, "Could not load model")
+            raise Exception(f"Could not load model [{self.service_name}]")
         self.image_size = (224, 224)
 
     def predict(self, req: dict) -> int:
         """Runs inference on the image provided in the given `req`uest.
         """
+        # The base-64 string is converted into an image object but this object
+        # cannot be passed to Keras directly. The object is first dumped into a
+        # temp file and then the filename is passed to Keras.
         try:
             image_obj = base64_to_image_obj(req)
         except TorchException as ex:
             raise TorchException(msg=str(ex), origin=self.service_name)
-        with open(self.temp_image_filename, "wb") as img_file:
+        random_file_name = self.__get_random_name()
+        temp_image_filename = temp_file(self.service_name, random_file_name)
+        with open(temp_image_filename, "wb") as img_file:
             img_file.write(image_obj)
-        # load model only once per session
-        if not self.model:
-            try:
-                self.model = load_model(self.model_filename)
-                log_i(self.service_name, "Model loaded")
-            except:
-                raise Exception(f"Could not load model [{self.service_name}]")
         try:
-            temp_image = self.__load_image(self.temp_image_filename)
+            temp_image = self.__load_image(temp_image_filename)
         except:
             raise Exception("Could not load image data")
         pred = self.model.predict(temp_image)
@@ -81,7 +85,12 @@ class KerasCnnImageService(Service):
                     "Unexpected class from model [{self.service_name}]")
         else:
             prediction_class = result[0]
+        os.remove(temp_image_filename)
         return prediction_class
+
+
+    def __get_random_name(self) -> str:
+        return "".join(random.choices(_POPULATION, k=_RANDOM_STRING_LENGTH))
 
     def __load_image(self, img_path):
         """
