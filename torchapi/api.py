@@ -11,12 +11,14 @@ import json
 
 from .exceptions import TorchException
 from .services.banknote import BanknoteService
+from .services.ocr import OcrService
 from .util import error_response, response_builder
 
 
 # service instances defined here should live as long as the session
 _SERVICES = {
-    "banknote": BanknoteService()
+    "banknote": BanknoteService(),
+    "ocr" : OcrService()
 }
 
 _UNKNOWN_SERVICE_ERROR = error_response(origin="server", msg="Unknown service")

@@ -28,12 +28,23 @@ def main():
                 image_base64 = base64_file.read()
 
             # emulate getting a request from the front end as json
+            
+            # banknote detection
             request = {"request": "banknote", "image": image_base64}
             request_json = json.dumps(request)
 
             print(f"{str(datetime.datetime.now())} - Sending request")
             response = handle(request_json)
             print(f"Actual class {dirname} - response = {response}")
+
+
+            # optical character recognition
+            request["request"] = "ocr" 
+            request_json = json.dumps(request)
+
+            print(f"{str(datetime.datetime.now())} - Sending request")
+            response = handle(request_json)
+            print(f"Actual class {dirname} - OCR = {response}")
 
 
 if __name__ == "__main__":

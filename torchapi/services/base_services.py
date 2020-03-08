@@ -29,6 +29,8 @@ class Service:
         self.service_name = service_name
         log_i(self.service_name, "Initiating new class")
 
+    def get_random_name(self) -> str:
+        return "".join(random.choices(_POPULATION, k=_RANDOM_STRING_LENGTH))
 
 class KerasCnnImageService(Service):
     """Base class for any service that uses CNN image classification using Keras
@@ -68,7 +70,7 @@ class KerasCnnImageService(Service):
             image_obj = base64_to_image_obj(req)
         except TorchException as ex:
             raise TorchException(msg=str(ex), origin=self.service_name)
-        random_file_name = self.__get_random_name()
+        random_file_name = super().get_random_name()
         temp_image_filename = temp_file(self.service_name, random_file_name)
         with open(temp_image_filename, "wb") as img_file:
             img_file.write(image_obj)
@@ -89,8 +91,6 @@ class KerasCnnImageService(Service):
         return prediction_class
 
 
-    def __get_random_name(self) -> str:
-        return "".join(random.choices(_POPULATION, k=_RANDOM_STRING_LENGTH))
 
     def __load_image(self, img_path):
         """
