@@ -35,9 +35,11 @@ def handle(req: str) -> str:
     jsonstr = json.loads(req)
     service = _SERVICES.get(jsonstr["request"])
     if not service:
-        return _UNKNOWN_SERVICE_ERROR
-    try:
-        prediction = service.predict(jsonstr)
-    except TorchException as exception:
-        return error_response(origin=exception.origin, msg=str(exception))
-    return response_builder(response=prediction)
+        response = _UNKNOWN_SERVICE_ERROR
+    else:
+        try:
+            prediction = service.predict(jsonstr)
+            response = response_builder(response=prediction)
+        except TorchException as exception:
+            response = error_response(origin=exception.origin, msg=str(exception))
+    return json.dumps(response)
