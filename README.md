@@ -7,7 +7,7 @@
 Example usage:
 
 ```python
-from torchapi.api import handle
+import torchapi
 
 request =
   """
@@ -16,7 +16,7 @@ request =
     "image": "data:image/png;base64,iVBORw0KGg..."
   }
   """
-response = handle(request)
+response = torchapi.handle(request)
 print(response)
 ```
 
