@@ -64,9 +64,10 @@ When the server returns a valid response, the `"status"` is set to `"ok"`.
 
 #### Services
 
-| Service            | Request    | Response type | Response                                      |
-| ------------------ | ---------- | :-----------: | --------------------------------------------- |
-| Banknote detection | `banknote` |     `int`     | `5` \| `10` \| `20` \| `50` \| `100` \| `200` |
+| Service                       | Request    | Response type | Response                                      |
+| ----------------------------- | ---------- | :-----------: | --------------------------------------------- |
+| Banknote detection            | `banknote` |     `int`     | `5` \| `10` \| `20` \| `50` \| `100` \| `200` |
+| Optical character recognition |    `ocr`   |    `String`   | `'Lorem ipsum dolor'`                         |
 
 #### Errors
 
