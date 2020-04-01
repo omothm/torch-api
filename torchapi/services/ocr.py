@@ -14,7 +14,7 @@ import os
 from .base_services import Service
 from .common import asset_file, temp_file, base64_to_image_obj
 from ..exceptions import TorchException
-
+from ..logger import log_e
 
 class OcrService(Service):
     """A service for optical character recognition
@@ -27,7 +27,7 @@ class OcrService(Service):
     def predict(self, req: dict) -> str:
         
         # Specify the path for Windows
-        #pytesseract.pytesseract.tesseract_cmd = r'D:\Tesseract-OCR\tesseract.exe'
+        # pytesseract.pytesseract.tesseract_cmd = r'D:\Tesseract-OCR\tesseract.exe'
 
         """
          NOTE: not sure this function should be called predict,
@@ -56,8 +56,10 @@ class OcrService(Service):
                 result = pytesseract.image_to_string(Image.open(temp_image_filename), lang=lang)
             else:
                 result = pytesseract.image_to_string(Image.open(temp_image_filename))
-        except:
-            raise Exception("Could not load image data")
+        except Exception as err:
+            # Log the error then throw the error
+            log_e(self.service_name,str(err))
+            raise err
 
         # remove the image file
         os.remove(temp_image_filename)
