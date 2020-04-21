@@ -17,7 +17,7 @@ from .util import error_response, response_builder
 
 # service instances defined here should live as long as the session
 _SERVICES = {
-    "banknote": BanknoteService(),
+    "banknote": BanknoteService(background_threshold=0.65),
     "ocr" : OcrService()
 }
 
@@ -38,8 +38,10 @@ def handle(req: str) -> str:
         response = _UNKNOWN_SERVICE_ERROR
     else:
         try:
-            prediction = service.predict(jsonstr)
-            response = response_builder(response=prediction)
+            prediction, confidence = service.predict(jsonstr)
+            response = response_builder(
+                response=prediction, confidence=confidence)
         except TorchException as exception:
-            response = error_response(origin=exception.origin, msg=str(exception))
+            response = error_response(
+                origin=exception.origin, msg=str(exception))
     return json.dumps(response)

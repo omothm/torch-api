@@ -26,7 +26,8 @@ Example output:
 {
   "status": "ok",
   "time": "2020-02-25 19:50:53.833346",
-  "response": 100
+  "response": 100,
+  "confidence": 0.78
 }
 ```
 
@@ -54,9 +55,12 @@ The contents of the base-64 string must adhere to the following regex:
 {
   "status": "<STATUS>",
   "time": "<SERVER_TIME>",
-  "response": "<RESPONSE>"
+  "response": "<RESPONSE>",
+  "confidence": "<CONFIDENCE>"
 }
 ```
+
+`confidence` is a number between 0 and 1 that indicates the level of confidence in the prediction.
 
 ### Valid values
 
@@ -64,10 +68,10 @@ When the server returns a valid response, the `"status"` is set to `"ok"`.
 
 #### Services
 
-| Service                       | Request    | Response type | Response                                      |
-| ----------------------------- | ---------- | :-----------: | --------------------------------------------- |
-| Banknote detection            | `banknote` |     `int`     | `5` \| `10` \| `20` \| `50` \| `100` \| `200` |
-| Optical character recognition |    `ocr`   |    `String`   | `'Lorem ipsum dolor'`                         |
+| Service                       | Request    | Response                                              |
+| ----------------------------- | ---------- | ----------------------------------------------------- |
+| Banknote detection            | `banknote` | `5` \| `10` \| `20` \| `50` \| `100` \| `200` \| `bg` |
+| Optical character recognition | `ocr`      | `'Lorem ipsum dolor'`                                 |
 
 #### Errors
 
@@ -76,6 +80,7 @@ In the case of error, the response is sent as follows:
 ```json
 {
   "status": "error",
+  "time": "<SERVER_TIME>",
   "error_origin": "<ERROR_ORIGIN>",
   "error_message": "<ERROR_MESSAGE>"
 }
