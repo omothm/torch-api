@@ -12,13 +12,15 @@ import json
 from .exceptions import TorchException
 from .services.banknote import BanknoteService
 from .services.ocr import OcrService
+from .services.colordetection import ColorDetectionService
 from .util import error_response, response_builder
 
 
 # service instances defined here should live as long as the session
 _SERVICES = {
     "banknote": BanknoteService(background_threshold=0.65),
-    "ocr" : OcrService()
+    "ocr" : OcrService(),
+    "color": ColorDetectionService()
 }
 
 _UNKNOWN_SERVICE_ERROR = error_response(origin="server", msg="Unknown service")

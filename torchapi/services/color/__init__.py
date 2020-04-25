@@ -1,0 +1,3 @@
+from .color_feature_extraction import histogram_of_test_image
+from .color_feature_extraction import histogram_of_training_image
+from .knn_classifier import classify
