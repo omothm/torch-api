@@ -63,6 +63,6 @@ class OcrService(Service):
 
         # remove the image file
         os.remove(temp_image_filename)
-        return result
+        return result,1
     
     
