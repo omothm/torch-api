@@ -5,7 +5,7 @@ predictions as box plots.
 
 Note that this script must be run while the background threshold is ZERO. The
 aim is to figure out a suitable threshold level. Running the confidence analysis
-while a threshold does ex
+while a threshold does exist will result in misleading statistics.
 
 This script accepts no args.
 """
@@ -19,7 +19,6 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from torchapi.api import handle
-from torchapi.exceptions import TorchException
 
 
 TEST_DIR = os.path.join(os.path.dirname(__file__), "data", "base64")
