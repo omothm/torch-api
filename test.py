@@ -19,6 +19,9 @@ from torchapi.api import handle
 def main():
     """Emulates a server sending requests to the API.
     """
+    
+    ocr_test_count = 0
+    ocr_average_similarity = 0.0
 
     # emulate getting a base-64 image from the front end
     (dirpath, dirnames, _) = next(os.walk(os.path.join(os.path.dirname(__file__), "test_input")))
@@ -71,13 +74,15 @@ def main():
 
                             print(f"{str(datetime.datetime.now())} - Sending request (OCR)")
 
+                            ocr_test_count += 1
+                            
                             response = handle(request_json)
                             response_dict = json.loads(response)
 
                             # Calculate the accuracy
                             file_name_without_extension = os.path.splitext(os.path.basename(current_file))[0]
                             similarity = SequenceMatcher(None, response_dict["response"], file_name_without_extension).ratio()                    
-
+                            ocr_average_similarity += similarity
                             print(f"{response_dict['time']} - OCR Result similarity score: {similarity}")
                         
         elif dirname in ['color_test_images']:
@@ -104,6 +109,14 @@ def main():
                                 print(f"{str(datetime.datetime.now())} - Sending request")
                                 response = handle(request_json)
                                 print(f"Actual class {dirname} - Color = {response}")
+
+
+    # All tests are over
+    
+    # Calculate the average similarity score for OCR
+    ocr_average_similarity = ocr_average_similarity / ocr_test_count
+    
+    print(f"OCR Similartiy score:{ocr_average_similarity} for {ocr_test_count} tests")
 
 if __name__ == "__main__":
     main()
