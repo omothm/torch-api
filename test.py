@@ -83,6 +83,10 @@ def main():
                             file_name_without_extension = os.path.splitext(os.path.basename(current_file))[0]
                             similarity = SequenceMatcher(None, response_dict["response"], file_name_without_extension).ratio()                    
                             ocr_average_similarity += similarity
+                            """
+                            print(f"    - OCR Actual result:{file_name_without_extension}")
+                            print(f"    - OCR Found  result:{response_dict['response']}   <{similarity}>")
+                            """
                             print(f"{response_dict['time']} - OCR Result similarity score: {similarity}")
                         
         elif dirname in ['color_test_images']:
@@ -116,7 +120,7 @@ def main():
     # Calculate the average similarity score for OCR
     ocr_average_similarity = ocr_average_similarity / ocr_test_count
     
-    print(f"OCR Similartiy score:{ocr_average_similarity} for {ocr_test_count} tests")
+    print(f"OCR Similarity score:{ocr_average_similarity} for {ocr_test_count} tests")
 
 if __name__ == "__main__":
     main()

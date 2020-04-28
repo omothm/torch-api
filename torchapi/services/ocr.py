@@ -16,6 +16,9 @@ from .common import asset_file, temp_file, base64_to_image_obj
 from ..exceptions import TorchException
 from ..logger import log_e
 
+import cv2
+import numpy as np
+
 class OcrService(Service):
     """A service for optical character recognition
     """
@@ -24,13 +27,40 @@ class OcrService(Service):
         service_name = "ocr"
         super().__init__(service_name)
 
+    def pre_process_image(self, full_img_path:str):
+        """
+            Reads the image from the given path,
+            applies image processing techniques
+                - resizing with inter_area interpolation
+                - bilateral filter
+                - adaptive thresholding
+            Overrides the new image file to the 
+            previous path.
+        """
+        
+        # Read the image as 1 channel (grayscaled)
+        img = cv2.imread(full_img_path,cv2.CV_8UC1)
+        
+        # Resize the image
+        img = cv2.resize(img, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
+        
+        # Remove the noise
+        img = cv2.bilateralFilter(img,9,75,75)
+
+        # Apply thresholding to stand out texts only
+        cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2)        
+        
+        # Write the image to the disk
+        cv2.imwrite(full_img_path,img)
+        
+
     def predict(self, req: dict) -> str:
         
         # Specify the path for Windows
         # pytesseract.pytesseract.tesseract_cmd = r'D:\Tesseract-OCR\tesseract.exe'
 
         """
-         NOTE: not sure this function should be called predict,
+         NOTE: not sure if this function should be called predict,
          but this is the function name that 'api.py' calls.
         """
 
@@ -43,10 +73,14 @@ class OcrService(Service):
             raise TorchException(msg=str(ex), origin=self.service_name)
 
         random_file_name = super().get_random_name()
-        temp_image_filename = temp_file(self.service_name, random_file_name)
+        temp_image_filename = temp_file(self.service_name, random_file_name) + ".jpg"
 
         with open(temp_image_filename, "wb") as img_file:
             img_file.write(image_obj)
+            
+        # Preprocess the image for better ocr
+        self.pre_process_image(temp_image_filename)
+        
         try:
             # Send the image name to the OCR engine
             
