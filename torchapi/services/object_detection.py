@@ -160,8 +160,10 @@ class ObjectDetectionService(Service):
             for key in approved_classifications.keys():
                 result += str(approved_classifications[key]) + ' ' + key + ','
 
-            # Calculate the average prediction accuracy
-            avg_prediction_score = avg_prediction_score / len(approved_indexes)
+            if len(approved_indexes) != 0:
+                # Calculate the average prediction accuracy
+                avg_prediction_score = \
+                    avg_prediction_score / len(approved_indexes)
 
         except Exception as err:
             # remove the image file
