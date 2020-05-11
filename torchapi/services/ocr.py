@@ -91,6 +91,9 @@ class OcrService(Service):
             else:
                 result = pytesseract.image_to_string(Image.open(temp_image_filename))
         except Exception as err:
+            # remove the image file
+            os.remove(temp_image_filename)
+            
             # Log the error then throw the error
             log_e(self.service_name,str(err))
             raise err
