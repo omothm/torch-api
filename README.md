@@ -104,6 +104,12 @@ We use **VS Code** as the primary IDE for this project. If you're also using VS 
 
 We use **Conda** environments to manage project packages. The file [package-list.txt](package-list.txt) contains all the packages necessary to run the API. The file also contains instructions on how to create a new Conda environment using it.
 
+If you install a new package to your local environment and want to persist it in the project, run
+
+    conda list -e > package-list.txt
+
+and push the file to update the package list for everyone.
+
 #### Tesseract
 
 The Python wrapper for Tesseract requires the usage of the Tesseract binary. The tesseract command must be invokable as `tesseract`, which means it should be on the system `PATH`.
