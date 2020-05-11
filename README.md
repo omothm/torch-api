@@ -93,3 +93,19 @@ Some of the errors and their meaning:
 | `Unknown service`      | `server` | The requested service is not one of those listed above.                 |
 | `No image`             |          | A service requires image data but no `image` was passed in the request. |
 | `Invalid image format` |          | The `image` in the request is not in the proper base-64 format.         |
+
+## Development Environment
+
+### IDE
+
+We use **VS Code** as the primary IDE for this project. If you're also using VS Code, it is recommended that you incorporate the settings in [settings.json](settings.json) into your project.
+
+### Python Virtual Environment
+
+We use **Conda** environments to manage project packages. The file [package-list.txt](package-list.txt) contains all the packages necessary to run the API. The file also contains instructions on how to create a new Conda environment using it.
+
+#### Tesseract
+
+The Python wrapper for Tesseract requires the usage of the Tesseract binary. The tesseract command must be invokable as `tesseract`, which means it should be on the system `PATH`.
+
+If you're on Windows, the latest working binary can be obtained [here](https://github.com/UB-Mannheim/tesseract/wiki). After installation, if the command `tesseract` is not working from the command prompt, add the installation location (typically `C:\Program Files\Tesseract OCR`) to the Windows Environment Variables. If it's still not working, uncomment line 60 in [ocr.py](torchapi/services/ocr.py) and put the path to the tesseract EXE.
