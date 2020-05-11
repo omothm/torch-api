@@ -122,6 +122,35 @@ def main():
                             response = handle(request_json)
                             print(
                                 f"Actual class {current_dir} - Color = {response}")
+        
+        elif dirname in ['object_detection_test_images']:
+            # Get the full dir path
+            full_path = os.path.join(dirpath, dirname)
+            
+            # Get all images
+            test_files = os.listdir(full_path)
+
+            for im in test_files:
+                # Emulate the api call
+                request = {}
+                request["request"] = "object_detection"
+
+                # Read the current_test_file and convert to base64
+                with open(os.path.join(full_path, im) , 'rb') as image_file:
+                    encoded_string = base64.b64encode(
+                        image_file.read())
+                request["image"] = "data:image/png;base64," + \
+                    encoded_string.decode('utf-8')
+                request_json = json.dumps(request)
+
+                print(
+                    f"{str(datetime.datetime.now())} - Sending request (Object Detection)")
+
+                response = handle(request_json)
+                response_dict = json.loads(response)
+
+                print(f"{response_dict}")
+            
 
     # All tests are over
 
