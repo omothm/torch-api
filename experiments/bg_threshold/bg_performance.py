@@ -12,7 +12,14 @@ This script does not perform any thresholding on its own--it just prints out
 the prediction results. Thresholding logic is completely embedded in the API
 itself (specifically, in the KerasCnnImageService class).
 
-This script accepts no args.
+This script requires args.
+
+Synopsis:
+
+    bg_performance.py <title>
+
+<title>: text to append to the graph title as follows: Banknote model accuracy,
+         <title>
 """
 
 __author__ = "Omar Othman <omar.othman@live.com>"
@@ -20,19 +27,26 @@ __author__ = "Omar Othman <omar.othman@live.com>"
 
 import json
 import os
-import matplotlib.pyplot as plt
-from tqdm import tqdm
+import sys
 
+import matplotlib.pyplot as plt
 import numpy as np
+from tqdm import tqdm
 
 from torchapi.api import handle
 
 
-PLOT_TITLE = "Banknote model accuracy, single thresh = 0.73"
+PLOT_TITLE = "Banknote model accuracy, %s"
 TEST_DIR = os.path.join(os.path.dirname(__file__), "data", "base64")
 
 
 def main():
+
+    if len(sys.argv) != 2:
+        print_help()
+        sys.exit(1)
+
+    title = sys.argv[1]
 
     # get all directories (classes) in the test directory
     (dirpath, dirnames, _) = next(
@@ -100,10 +114,18 @@ def main():
     plt.ylabel('Percentage')
     plt.grid(which='major', axis='y')
     plt.ylim([0, 100])
-    plt.title(PLOT_TITLE)
+    plt.title(PLOT_TITLE % title)
     plt.xticks(x, dirnames)
     plt.legend()
     plt.show()
+
+
+def print_help():
+    print("Synopsis:")
+    print(f"    {os.path.basename(sys.argv[0])} <title>")
+    print(f"<title>: text to append to the graph title as follows: Banknote model accuracy,")
+    print("          <title>")
+
 
 
 if __name__ == "__main__":
