@@ -28,8 +28,7 @@ import numpy as np
 from torchapi.api import handle
 
 
-# PLOT_TITLE = "Banknote model accuracy, single thresh = 0.65"
-PLOT_TITLE = "Banknote model accuracy, no thresh"
+PLOT_TITLE = "Banknote model accuracy, single thresh = 0.73"
 TEST_DIR = os.path.join(os.path.dirname(__file__), "data", "base64")
 
 
@@ -82,6 +81,12 @@ def main():
         incorrect_preds[i] = incorrect_preds[i] / len(filenames) * 100
         bg_preds[i] = bg_preds[i] / len(filenames) * 100
         error_preds[i] = error_preds[i] / len(filenames) * 100
+
+    print("\nStatistics:")
+    correct_percentage = sum(correct_preds) / sum(correct_preds + incorrect_preds + bg_preds)
+    incorrect_percentage = sum(incorrect_preds) / sum(correct_preds + incorrect_preds + bg_preds)
+    print(f"Correct percentage: {correct_percentage * 100:.2f}%")
+    print(f"Incorrect percentage: {incorrect_percentage * 100:.2f}%")
 
     print("\nPlotting results...")
     x = np.arange(len(dirnames))
