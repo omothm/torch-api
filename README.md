@@ -115,3 +115,11 @@ and push the file to update the package list for everyone.
 The Python wrapper for Tesseract requires the usage of the Tesseract binary. The tesseract command must be invokable as `tesseract`, which means it should be on the system `PATH`.
 
 If you're on Windows, the latest working binary can be obtained [here](https://github.com/UB-Mannheim/tesseract/wiki). After installation, if the command `tesseract` is not working from the command prompt, add the installation location (typically `C:\Program Files\Tesseract OCR`) to the Windows Environment Variables. If it's still not working, uncomment line 60 in [ocr.py](torchapi/services/ocr.py) and put the path to the tesseract EXE.
+
+## Datasets
+
+Some datasets are used in this project but not committed to the repository (because of its large size). These datasets can be used locally (must be added to a preferrably local `.gitignore`). However, their links will always be updated here for reference.
+
+| Dataset           | Type | Last updated | Link                                                               |
+| ----------------- | ---- | ------------ | ------------------------------------------------------------------ |
+| Turkish banknotes | Test | 13.05.2020   | https://drive.google.com/open?id=1OQaUwDT8GiROOJehbE0bYXmbcmaxp3_A |
