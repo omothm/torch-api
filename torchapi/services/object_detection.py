@@ -26,7 +26,7 @@ class ObjectDetectionService(Service):
 
     MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
     LABELS_FILE = 'mscoco_label_map.pbtxt'
-    CLASSIFICATION_THRESHOLD = .75
+    CLASSIFICATION_THRESHOLD = .5
 
     def __init__(self):
         service_name = "object_detection"
