@@ -5,6 +5,8 @@ Classes representing common functionalities for services.
 
 __author__ = "Emre Bicer; Omar Othman"
 
+
+from abc import ABC, abstractmethod
 import os
 import random
 import numpy as np
@@ -22,13 +24,22 @@ _POPULATION = list(map(chr, list(range(48, 58)) +
 _RANDOM_STRING_LENGTH = 64
 
 
-class Service:
+class Service(ABC):
     """Base class for all Torch services.
     """
 
-    def __init__(self, service_name):
+    def __init__(self, service_name, config=None):
         self.service_name = service_name
+        self.config = config
         log_i(self.service_name, "Initiating new class")
+
+    @abstractmethod
+    def predict(self, req: dict) -> (str, float):
+        """Runs inference on the given `req`uest.
+
+        Returns the predicted class as a string and its confidence level. The
+        confidence level is a number between 0 and 1.
+        """
 
     def get_random_name(self) -> str:
         return "".join(random.choices(_POPULATION, k=_RANDOM_STRING_LENGTH))
@@ -49,16 +60,39 @@ class KerasCnnImageService(Service):
     Default is `model.h5`.
     """
 
-    def __init__(self, service_name, class_map: dict = None,
-                 model_filename: str = "model.h5",
-                 background_threshold: float = 0):
-        super().__init__(service_name)
+    def __init__(self, service_name, config=None, class_map: dict = None,
+                 model_filename: str = "model.h5"):
+        super().__init__(service_name, config)
         self.class_map = class_map
         self.model_filename = asset_file(self.service_name, model_filename)
-        if not 0 <= background_threshold < 1:
+
+        # configurations
+        self.background_threshold = 0.0
+        if self.config:
+            self.background_threshold = self.config.get(
+                "background_threshold", 0.0)
+
+        # sanity checks
+        invalid_threshold = False
+        # convert int to float
+        if isinstance(self.background_threshold, int):
+            self.background_threshold = float(self.background_threshold)
+        if isinstance(self.background_threshold, float):
+            if not 0 <= self.background_threshold < 1:
+                invalid_threshold = True
+        else:  # list
+            if not class_map:
+                raise ValueError(
+                    "Class map must be provided if background threshold is a list")
+            if len(self.background_threshold) != len(class_map):
+                raise ValueError(
+                    "Threshold list length must the be same as the class map")
+            if np.max(self.background_threshold) >= 1 or np.min(self.background_threshold) < 0:
+                invalid_threshold = True
+        if invalid_threshold:
             raise ValueError(
                 "Background threshold must be between 0 (inclusive) and 1 (exclusive)")
-        self.background_threshold = background_threshold
+
         try:
             self.model = load_model(self.model_filename)
             log_i(self.service_name, "Model loaded")
@@ -67,20 +101,16 @@ class KerasCnnImageService(Service):
             raise Exception(f"Could not load model [{self.service_name}]")
         self.image_size = (224, 224)
 
-    def predict(self, req: dict):
-        """Runs inference on the image provided in the given `req`uest.
+    def predict(self, req: dict) -> (str, float):
+        """Runs inference on the image in the given `req`uest.
 
         Returns the predicted class as a string and its confidence level. If the
-        confidence level is below the given threshold (defined in the
+        confidence level is below a given threshold (defined in the
         constructor), the predicted class is set to 'bg'.
 
         The confidence level is a number between 0 and 1 and is the one that
         corresponds to the predicted class's activation node in the model's last
         layer.
-
-        For models with softmax as the last layer, all nodes must add up to 1.
-        This means that the minimum confidence level possible for the predicted
-        class (the maximum node) is `1/n`, where `n` is the number of classes.
         """
         # The base-64 string is converted into an image object but this object
         # cannot be passed to Keras directly. The object is first dumped into a
@@ -98,7 +128,9 @@ class KerasCnnImageService(Service):
         except:
             raise TorchException(
                 "Could not load image data", self.service_name)
+        # Get a value between 0 and 1 for each class (pred is a list in a list)
         pred = self.model.predict(temp_image)
+        # Get the index of the highest prediction
         result = np.argmax(pred, axis=1)
         if self.class_map:
             prediction_class = self.class_map.get(result[0], None)
@@ -109,12 +141,15 @@ class KerasCnnImageService(Service):
             prediction_class = result[0]
         os.remove(temp_image_filename)
 
-        # Return the predicted class along with the confidence level (a number
-        # between 0 and 1).
         confidence = float(pred[0][result[0]])
-        if confidence < self.background_threshold:
+        # Compare the confidence with either the single-value threshold or the
+        # corresponding class threshold if threshold is a provided as a list.
+        if (isinstance(self.background_threshold, float) and
+                confidence < self.background_threshold) \
+                or (isinstance(self.background_threshold, list) and
+                    confidence < self.background_threshold[result[0]]):
             prediction_class = 'bg'
-        
+
         # Always return a string class
         return str(prediction_class), confidence
 

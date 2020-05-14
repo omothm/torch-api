@@ -10,7 +10,7 @@ class BanknoteService(KerasCnnImageService):
     """A service for detecting Turkish banknotes.
     """
 
-    def __init__(self, background_threshold=0):
+    def __init__(self, config):
         service_name = "banknote"
         # banknote denominations
         class_map = {
@@ -21,5 +21,4 @@ class BanknoteService(KerasCnnImageService):
             4: 5,
             5: 50,
         }
-        super().__init__(service_name, class_map=class_map,
-                         background_threshold=background_threshold)
+        super().__init__(service_name, class_map=class_map, config=config)
