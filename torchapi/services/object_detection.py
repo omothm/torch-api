@@ -95,6 +95,32 @@ class ObjectDetectionService(Service):
 
         return output_dict
 
+    def get_objects_with_frames(self, image_path: str) -> list:
+        image_np = np.array(Image.open(image_path))
+        result_dict = self.\
+                run_inference_for_single_image(self.detection_model, image_np)
+
+        # Filter the output by the threshold value
+        approved_indexes = []
+
+        for index, score in enumerate(result_dict['detection_scores']):
+            if score > self.CLASSIFICATION_THRESHOLD:
+                approved_indexes.append(index)
+
+        final_objects = []
+
+        # Get the approved classified objects
+        for index, class_id in enumerate(result_dict['detection_classes']):
+            if index in approved_indexes:
+                category = self.category_index.get(class_id)
+                final_objects.append({
+                    'object_name' : category['name'],
+                    'frames' : result_dict['detection_boxes'][index]
+                })
+
+        return final_objects
+    
+
     def predict(self, req: dict) -> (str, float):
         """
             Expects a dictionary type `req`uest
