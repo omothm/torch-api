@@ -2,38 +2,31 @@
 
 Plots statistics on the the confidence range of a given class.
 
-This script accepts args.
-
-Synopsis:
-
-    analysis.py <path>...
-
-<path>...: the paths inside data/base64/ of the class to analyze.
+This script accepts args. See print_help.
 """
 
 
 __author__ = "Omar Othman <omar.othman@live.com>"
 
 
-import json
 import os
 import sys
 
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 
-from torchapi.api import handle
+from .util import load_base64, predict
 
 
 TEST_DIR = os.path.join(os.path.dirname(__file__), "data", "base64")
 
 
 def main():
-
+    # sanity check for args
     if len(sys.argv) < 2:
         print_help(os.path.basename(sys.argv[0]))
         sys.exit(1)
 
+    # get classes from args
     class_names = sys.argv[1:]
 
     confidences = [[] for _ in enumerate(class_names)]
@@ -43,25 +36,13 @@ def main():
 
     # for each directory (class), run the inference on all images
     for i, class_name in enumerate(class_names):
-        path = os.path.join(TEST_DIR, class_name)
-        (_, _, filenames) = next(os.walk(path))
-        for filename in tqdm(filenames, desc=class_name, unit="file"):
-
-            # get the base64 image string
-            with open(os.path.join(path, filename), "r") as base64_file:
-                image_base64 = base64_file.read()
-
-            # build the request
-            request_json = {"request": "banknote", "image": image_base64}
-            request = json.dumps(request_json)
-
-            # infer
-            response = handle(request)
-            response_json = json.loads(response)
+        images = load_base64(class_name, os.path.join(TEST_DIR, class_name))
+        for (response_json, _) in predict(images):
             if response_json["status"] == "error":
-                errors.append(f"{filename}: {response_json['error_message']}")
+                errors.append(
+                    f"Error in {class_name}: {response_json['error_message']}"
+                )
                 continue
-
             if response_json["status"] == "ok":
                 confidences[i].append(response_json["confidence"])
 

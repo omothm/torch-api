@@ -83,12 +83,14 @@ def grid_search(title, class_names, background_images, option_threshold_curve):
 
     # calculate true positive confidences
     true_positive_confidences = []
+    num_samples = 0
     for class_name in class_names:
         images = load_base64(
             class_name,
             os.path.join(TEST_DIR, class_name),
             desc=f"[{class_name}] loading"
         )
+        num_samples = num_samples + len(images)
         true_positive_confidences.extend(_calculate_tp_confidences(
             images,
             class_name
@@ -107,7 +109,8 @@ def grid_search(title, class_names, background_images, option_threshold_curve):
     deltas, tp_percentages, fp_percentages = calculate_deltas(
         tvals,
         true_positive_confidences,
-        false_positive_confidences
+        false_positive_confidences,
+        num_samples
     )
     best_t_index = np.argmin(deltas)
     best_t = tvals[best_t_index]
@@ -123,26 +126,30 @@ def grid_search(title, class_names, background_images, option_threshold_curve):
 
     if option_threshold_curve:
         plt.figure()
+        plt.axes().set_aspect('equal')
         plt.plot(
             tp_percentages,
             fp_percentages,
             label="Threshold values"
         )
-        plt.scatter([1], [0], color="orange", label="Optimal point")
+        optimal_tp = len(true_positive_confidences) / num_samples
+        plt.scatter([optimal_tp], [0], color="orange", label="Optimal point")
         nearest_point = (
             tp_percentages[best_t_index],
             fp_percentages[best_t_index]
         )
         plt.plot(
-            [1, nearest_point[0]],
+            [optimal_tp, nearest_point[0]],
             [0, nearest_point[1]],
             color="gray",
             linestyle=":",
             label="Nearest point"
         )
         plt.text(nearest_point[0], nearest_point[1], f"$t$ = {best_t:.2f}")
-        plt.xlim([-0.1, 1.1])
-        plt.ylim([-0.1, 1.1])
+        left, right = plt.xlim()
+        bottom, top = plt.ylim()
+        plt.xlim(min(left, bottom), max(right, top))
+        plt.ylim(min(left, bottom), max(right, top))
         plt.xlabel("True positive percentage")
         plt.ylabel("False positive percentage")
         plt.title(TITLE_THRESHOLD_CURVE % title)
@@ -150,7 +157,7 @@ def grid_search(title, class_names, background_images, option_threshold_curve):
         plt.grid()
 
 
-def calculate_deltas(tvals, tp_confidences, fp_confidences):
+def calculate_deltas(tvals, tp_confidences, fp_confidences, num_samples):
     """Calculates deltas for all threshold values `tvals` and returns three
     lists: deltas, true positive percentages, false positive percentages.
     """
@@ -161,7 +168,8 @@ def calculate_deltas(tvals, tp_confidences, fp_confidences):
         dval, tp_pct, fp_pct = delta(
             tval,
             tp_confidences,
-            fp_confidences
+            fp_confidences,
+            num_samples
         )
         deltas.append(dval)
         tp_percentages.append(tp_pct)
@@ -169,19 +177,20 @@ def calculate_deltas(tvals, tp_confidences, fp_confidences):
     return deltas, tp_percentages, fp_percentages
 
 
-def delta(tval, tp_confidences, fp_confidences):
+def delta(tval, tp_confidences, fp_confidences, num_samples):
     """Calculates delta (as described in the thesis) for the given threshold
     value, and the percentages of true positives and false positives at that
     threshold.
     """
     tp_percentage = \
-        np.sum([1 for x in tp_confidences if x > tval]) / len(tp_confidences)
+        np.sum([1 for x in tp_confidences if x > tval]) / num_samples
     if fp_confidences:
         fp_percentage = np.sum([1 for x in fp_confidences if x > tval]) / \
             len(fp_confidences)
     else:
         fp_percentage = 0
-    delta_value = tp_percentage ** 2 - 2 * tp_percentage + fp_percentage ** 2
+    optimal_tp = len(tp_confidences) / num_samples
+    delta_value = (tp_percentage - optimal_tp) ** 2 + fp_percentage ** 2
     return delta_value, tp_percentage, fp_percentage
 
 

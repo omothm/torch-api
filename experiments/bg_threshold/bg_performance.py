@@ -42,6 +42,7 @@ def main():
     incorrect_preds = [0 for _ in enumerate(dirnames)]
     bg_preds = [0 for _ in enumerate(dirnames)]
     error_preds = [0 for _ in enumerate(dirnames)]
+    fp_percentage = None
     for i, dirname in enumerate(dirnames):
         print(f"[Class {dirname}]")
         images = load_base64(dirname, os.path.join(dirpath, dirname))
@@ -63,13 +64,14 @@ def main():
         incorrect_preds[i] = incorrect_preds[i] / len(images) * 100
         bg_preds[i] = bg_preds[i] / len(images) * 100
         error_preds[i] = error_preds[i] / len(images) * 100
+        if dirname == 'bg':
+            fp_percentage = 100 - bg_preds[i]
 
     print("\nStatistics:")
     # filter zero out because it belongs to "bg"
-    correct_percentage = np.average([x for x in correct_preds if x != 0])
-    incorrect_percentage = np.average(incorrect_preds)
-    print(f"Correct percentage: {correct_percentage:.2f}%")
-    print(f"Incorrect percentage: {incorrect_percentage:.2f}%")
+    tp_percentage = np.average([x for x in correct_preds if x != 0])
+    print(f"True positive: {tp_percentage:.2f}%")
+    print(f"False positive: {fp_percentage:.2f}%")
 
     print("\nPlotting results...")
     x = np.arange(len(dirnames))
