@@ -15,11 +15,11 @@ from .services.colordetection import ColorDetectionService
 from .services.detailed_color import DetailedColor
 from .services.ocr import OcrService
 from .services.object_detection import ObjectDetectionService
-from .util import error_response, response_builder
+from .util import error_response, get_config, response_builder
 
 # service instances defined here should live as long as the session
 _SERVICES = {
-    "banknote": BanknoteService(background_threshold=0.65),
+    "banknote": BanknoteService(config=get_config("banknote")),
     "ocr": OcrService(),
     "color": ColorDetectionService(),
     "detailed_color": DetailedColor(),
