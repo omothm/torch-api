@@ -1,12 +1,10 @@
 {
-	// Recommended settings for the project.
-	// Copy these settings into .vscode/settings.json
-	"editor.comments.insertSpace": true,
+    "editor.insertSpaces": true,
     "editor.tabSize": 4,
+    "prettier.tabWidth": 4,
+    "prettier.useTabs": false,
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
     "python.formatting.provider": "autopep8",
-    "python.linting.pylintArgs": [
-        "--enable=all"
-    ]
+    "python.linting.pylintArgs": ["--enable=all"]
 }
