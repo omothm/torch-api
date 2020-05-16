@@ -12,28 +12,20 @@ This script does not perform any thresholding on its own--it just prints out
 the prediction results. Thresholding logic is completely embedded in the API
 itself (specifically, in the KerasCnnImageService class).
 
-This script requires args.
-
-Synopsis:
-
-    bg_performance.py <title>
-
-<title>: text to append to the graph title as follows: Banknote model accuracy,
-         <title>
+This script does not accept args.
 """
 
 __author__ = "Omar Othman <omar.othman@live.com>"
 
 
-import json
 import os
-import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
-from tqdm import tqdm
 
-from torchapi.api import handle
+from torchapi import get_config
+
+from .util import load_base64, predict
 
 
 PLOT_TITLE = "Banknote model accuracy, %s"
@@ -41,13 +33,6 @@ TEST_DIR = os.path.join(os.path.dirname(__file__), "data", "base64")
 
 
 def main():
-
-    if len(sys.argv) != 2:
-        print_help()
-        sys.exit(1)
-
-    title = sys.argv[1]
-
     # get all directories (classes) in the test directory
     (dirpath, dirnames, _) = next(
         os.walk(os.path.join(os.path.dirname(__file__), TEST_DIR)))
@@ -57,27 +42,10 @@ def main():
     incorrect_preds = [0 for _ in enumerate(dirnames)]
     bg_preds = [0 for _ in enumerate(dirnames)]
     error_preds = [0 for _ in enumerate(dirnames)]
-
-    print("\nPredicting classes...")
     for i, dirname in enumerate(dirnames):
-
-        # for each directory (class), run the inference on all images
-        path = os.path.join(dirpath, dirname)
-        (_, _, filenames) = next(os.walk(path))
-        for filename in tqdm(filenames, desc=dirname, unit="file"):
-
-            # get the base64 image string
-            with open(os.path.join(path, filename), "r") as base64_file:
-                image_base64 = base64_file.read()
-
-            # build the request
-            request_json = {"request": "banknote", "image": image_base64}
-            request = json.dumps(request_json)
-
-            # infer
-            response = handle(request)
-            response_json = json.loads(response)
-
+        print(f"[Class {dirname}]")
+        images = load_base64(dirname, os.path.join(dirpath, dirname))
+        for (response_json, _) in predict(images):
             if response_json["status"] == "error":
                 error_preds[i] = error_preds[i] + 1
             elif response_json["status"] == "ok":
@@ -91,16 +59,17 @@ def main():
                 raise ValueError("Unknown status")
 
         # normalize the prediction between 0 and 100
-        correct_preds[i] = correct_preds[i] / len(filenames) * 100
-        incorrect_preds[i] = incorrect_preds[i] / len(filenames) * 100
-        bg_preds[i] = bg_preds[i] / len(filenames) * 100
-        error_preds[i] = error_preds[i] / len(filenames) * 100
+        correct_preds[i] = correct_preds[i] / len(images) * 100
+        incorrect_preds[i] = incorrect_preds[i] / len(images) * 100
+        bg_preds[i] = bg_preds[i] / len(images) * 100
+        error_preds[i] = error_preds[i] / len(images) * 100
 
     print("\nStatistics:")
-    correct_percentage = sum(correct_preds) / sum(correct_preds + incorrect_preds + bg_preds)
-    incorrect_percentage = sum(incorrect_preds) / sum(correct_preds + incorrect_preds + bg_preds)
-    print(f"Correct percentage: {correct_percentage * 100:.2f}%")
-    print(f"Incorrect percentage: {incorrect_percentage * 100:.2f}%")
+    # filter zero out because it belongs to "bg"
+    correct_percentage = np.average([x for x in correct_preds if x != 0])
+    incorrect_percentage = np.average(incorrect_preds)
+    print(f"Correct percentage: {correct_percentage:.2f}%")
+    print(f"Incorrect percentage: {incorrect_percentage:.2f}%")
 
     print("\nPlotting results...")
     x = np.arange(len(dirnames))
@@ -114,18 +83,12 @@ def main():
     plt.ylabel('Percentage')
     plt.grid(which='major', axis='y')
     plt.ylim([0, 100])
-    plt.title(PLOT_TITLE % title)
+    thresh = get_config("banknote")["background_threshold"]
+    plt.title(PLOT_TITLE %
+              f"{'multi-' if isinstance(thresh, list) else 'single '}thresh = {thresh}")
     plt.xticks(x, dirnames)
     plt.legend()
     plt.show()
-
-
-def print_help():
-    print("Synopsis:")
-    print(f"    {os.path.basename(sys.argv[0])} <title>")
-    print(f"<title>: text to append to the graph title as follows: Banknote model accuracy,")
-    print("          <title>")
-
 
 
 if __name__ == "__main__":
