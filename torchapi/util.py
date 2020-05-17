@@ -5,7 +5,31 @@ Helper functions for the API.
 
 __author__ = "Omar Othman"
 
+
 import datetime
+import json
+import os
+
+
+# constants
+_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "..", "config.json")
+
+
+# initializations
+try:
+    with open(_CONFIG_PATH, "r") as config_file:
+        _CONFIG = json.load(config_file)
+except FileNotFoundError:
+    _CONFIG = {}
+
+
+def get_config(service):
+    """Gets configurations for the given `service` from the default
+    configuration JSON file.
+
+    If no configuration is found, returns `None`.
+    """
+    return _CONFIG.get(service, None)
 
 
 def response_builder(status="ok", **kwargs) -> dict:
