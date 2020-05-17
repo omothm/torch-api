@@ -58,7 +58,7 @@ class OcrService(Service):
     def predict(self, req: dict) -> str:
         
         # Specify the path for Windows
-        pytesseract.pytesseract.tesseract_cmd = r'D:\Tesseract-OCR\tesseract.exe'
+        # pytesseract.pytesseract.tesseract_cmd = r'D:\Tesseract-OCR\tesseract.exe'
 
         """
          NOTE: not sure if this function should be called predict,
