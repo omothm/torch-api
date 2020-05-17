@@ -11,6 +11,7 @@ except ImportError:
 import pytesseract
 
 import os
+import re
 from .base_services import Service
 from .common import asset_file, temp_file, base64_to_image_obj
 from ..exceptions import TorchException
@@ -57,7 +58,7 @@ class OcrService(Service):
     def predict(self, req: dict) -> str:
         
         # Specify the path for Windows
-        # pytesseract.pytesseract.tesseract_cmd = r'D:\Tesseract-OCR\tesseract.exe'
+        pytesseract.pytesseract.tesseract_cmd = r'D:\Tesseract-OCR\tesseract.exe'
 
         """
          NOTE: not sure if this function should be called predict,
@@ -86,10 +87,25 @@ class OcrService(Service):
             
             # Check if the language is specified
             lang = req.get("language", None)
+            config = ("--oem 1")
+
             if lang:
-                result = pytesseract.image_to_string(Image.open(temp_image_filename), lang=lang)
+                result = pytesseract.image_to_string(Image.open(temp_image_filename), lang=lang, config=config)
             else:
-                result = pytesseract.image_to_string(Image.open(temp_image_filename))
+                result = pytesseract.image_to_string(Image.open(temp_image_filename), config=config)
+
+            # Format the output, avoid unnecessarry chars
+
+            # Replace all whitespaces with single space
+            result = re.sub(r'()\s', ' ', result)
+            # Replace punctiation chars with single space
+            result = re.sub(r'[.,!;:]', ' ', result)
+            # If not char, number or (+ * - %) replace with single space
+            result = re.sub(r'[^a-zA-Z0-9+*\-%]', ' ', result)
+            # Make sure all spaces are only a single space
+            result = ' '.join(result.split())
+
+
         except Exception as err:
             # remove the image file
             os.remove(temp_image_filename)
