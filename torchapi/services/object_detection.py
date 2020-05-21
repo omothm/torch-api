@@ -11,6 +11,7 @@ except ImportError:
 import numpy as np
 import os
 import tensorflow as tf
+from pattern.en import pluralize
 
 from .assets.object_detection.utils import label_map_util
 
@@ -184,7 +185,12 @@ class ObjectDetectionService(Service):
             # Prepare the result string
             result = ''
             for key in approved_classifications.keys():
-                result += str(approved_classifications[key]) + ' ' + key + ','
+                if approved_classifications[key] > 1:
+                    # Convert to plural
+                    result += str(approved_classifications[key]) + ' ' + pluralize(key) + ','
+                else:
+                    # Already singular
+                    result += str(approved_classifications[key]) + ' ' + key + ','
 
             if len(approved_indexes) != 0:
                 # Calculate the average prediction accuracy
@@ -207,5 +213,17 @@ class ObjectDetectionService(Service):
         else:
             # Remove the last comma
             result = result[:-1]
+            if ',' in result:
+                # Get the last , index
+                last_comma_index = result.rfind(',')
+                result = result[:last_comma_index] + " and " + result[last_comma_index+1:]
+
+        # Finally add a space after each comma
+        result = result.replace(',',', ')
+
+        # Pattern library can't pluralize these keywords so do it manually here
+        result = result.replace('buss', 'busses')
+        result = result.replace('skis', 'pair of skis')
+        result = result.replace('skiss', 'pair of skis')
 
         return result, avg_prediction_score
