@@ -100,8 +100,8 @@ class OcrService(Service):
             result = re.sub(r'()\s', ' ', result)
             # Replace punctiation chars with single space
             result = re.sub(r'[.,!;:]', ' ', result)
-            # If not char, number or (+ * - %) replace with single space
-            result = re.sub(r'[^a-zA-Z0-9+*\-%]', ' ', result)
+            # If not char, number or (+ - %) replace with single space
+            result = re.sub(r'[^a-zA-Z0-9+\-%]', ' ', result)
             # Make sure all spaces are only a single space
             result = ' '.join(result.split())
 
