@@ -4,6 +4,7 @@
 
 __author__ = "Emre Bicer"
 
+import time
 import base64
 import datetime
 import json
@@ -22,6 +23,9 @@ def main():
 
     ocr_test_count = 0
     ocr_average_similarity = 0.0
+    ocr_total_duration = .0
+    ocr_max_inference_duration = -1.0
+    ocr_minimum_similarity = 1.0
 
     # Get the full path for input directory
     test_input_path = os.path.join(os.path.dirname(__file__), 'test_input')
@@ -54,9 +58,22 @@ def main():
                 print(
                     f"{str(datetime.datetime.now())} - Sending request (OCR)")
 
-                ocr_test_count += 1
+
+                # Start timer
+                inference_time_start = time.time()
 
                 response = handle(request_json)
+                ocr_test_count += 1
+
+                # End the timer
+                inference_duration = (time.time() - inference_time_start)
+                ocr_total_duration += inference_duration
+
+                # At initial test the time is biased because of imported libraries,
+                # If it is the duration for 1st test just ignore it
+                if ocr_max_inference_duration < inference_duration and ocr_test_count != 1:
+                    ocr_max_inference_duration = inference_duration
+
                 response_dict = json.loads(response)
                 if response_dict['status'] == 'ok':
                     # Calculate the accuracy
@@ -64,6 +81,10 @@ def main():
                         os.path.basename(current_file))[0]
                     similarity = SequenceMatcher(
                         None, response_dict["response"], file_name_without_extension).ratio()
+
+                    if ocr_minimum_similarity > similarity:
+                        ocr_minimum_similarity = similarity
+
                     ocr_average_similarity += similarity
                     """
                         print(f"    - OCR Actual result:{file_name_without_extension}")
@@ -74,9 +95,18 @@ def main():
 
     # Calculate the average similarity score for OCR
     ocr_average_similarity = ocr_average_similarity / ocr_test_count
+    ocr_average_duration = ocr_total_duration / ocr_test_count
 
-    print(
-        f"OCR Similarity score:{ocr_average_similarity} for {ocr_test_count} tests")
+    print('\n\nSummary\n')
+
+    print(f'\t# of tests: {ocr_test_count}')
+    print(f'\tDuration results:')
+    print(f'\t\tTotal inference duration:{ocr_total_duration} seconds')
+    print(f'\t\tAverage inference duration:{ocr_average_duration} seconds')
+    print(f'\t\tMaximum inference duration:{ocr_max_inference_duration} seconds')
+    print(f'\tSimilarity results: range -> [0, 1]')
+    print(f'\t\tAverage similarity score:{ocr_average_similarity}')
+    print(f'\t\tMinimum similarity score:{ocr_minimum_similarity}\n')
 
 
 if __name__ == "__main__":
