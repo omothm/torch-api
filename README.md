@@ -94,6 +94,21 @@ Some of the errors and their meaning:
 | `No image`             |          | A service requires image data but no `image` was passed in the request. |
 | `Invalid image format` |          | The `image` in the request is not in the proper base-64 format.         |
 
+
+## Testing
+
+Run
+
+    python -m tests all
+
+to run tests on all test modules, or specify the modules to test:
+
+    python -m tests <module1> <module2> ...
+  
+To see which modules are available to test, run
+
+    python -m tests list
+
 ## Development Environment
 
 ### IDE

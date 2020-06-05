@@ -9,19 +9,12 @@ import datetime
 import json
 import os
 
-# torchapi is at the parent directory
-# add 'parent_dir' to the path
-import sys
-sys.path.insert(0,'..')
-from torchapi.api import handle
+from torchapi import handle
 
 
 def main():
     """Emulates a server sending requests to the API.
     """
-
-    ocr_test_count = 0
-    ocr_average_similarity = 0.0
 
     # Get the full path for input directory
     test_input_path = os.path.join(os.path.dirname(__file__), 'test_input')

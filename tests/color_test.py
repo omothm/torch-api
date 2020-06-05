@@ -2,15 +2,11 @@
 
 """
 
-import base64
 import datetime
 import json
 import os
-# torchapi is at the parent directory
-# add 'parent_dir' to the path
-import sys
-sys.path.insert(0,'..')
-from torchapi.api import handle
+
+from torchapi import handle
 
 
 def main():
