@@ -103,7 +103,7 @@ Run
 
 to run tests on all test modules, or specify the modules to test:
 
-    python -m tests <module1> <module2> ...
+    python -m tests modules <module1> <module2> ...
   
 To see which modules are available to test, run
 
