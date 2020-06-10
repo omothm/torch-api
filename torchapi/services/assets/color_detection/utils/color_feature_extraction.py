@@ -4,9 +4,16 @@ import numpy as np
 import os
 
 path=os.path.dirname(__file__)
-def histogram_of_test_image(test_image):
+def histogram_of_test_image(test_image,frame=None):
     image=cv2.imread(test_image)
-    feature_data = __calculate_histogram(image)
+
+    if frame is None:
+        feature_data = __calculate_histogram(image)
+    else:
+        im_width, im_height,_ = image.shape
+        ymin, xmin, ymax, xmax = frame
+        feature_data = __calculate_histogram(image[(int) (ymin * im_height):(int)(ymax * im_height) ,(int)(xmin * im_width):(int)(xmax * im_width)])
+    
     try:
         with open(os.path.join(path, 'test.data'), "w") as myfile:
             myfile.write(feature_data)

@@ -11,7 +11,7 @@ import json
 
 from .exceptions import TorchException
 from .services.banknote import BanknoteService
-from .services.colordetection import ColorDetectionService
+from .services.color_detection import ColorDetectionService
 from .services.detailed_color import DetailedColor
 from .services.ocr import OcrService
 from .services.object_detection import ObjectDetectionService
@@ -21,7 +21,7 @@ from .util import error_response, get_config, response_builder
 _SERVICES = {
     "banknote": BanknoteService(config=get_config("banknote")),
     "ocr": OcrService(),
-    "color": ColorDetectionService(),
+    "color": ColorDetectionService(ObjectDetectionService()),
     "detailed_color": DetailedColor(),
     "object_detection": ObjectDetectionService()
 }
