@@ -22,6 +22,8 @@ def kNearestNeighbors(training_feature_vector, testInstance, k):
     for x in range(len(training_feature_vector)):
         dist = calculateEuclideanDistance(testInstance,
                 training_feature_vector[x], length)
+        if (dist == 0):
+            distances.append((training_feature_vector[x], dist))
         distances.append((training_feature_vector[x], dist))
     distances.sort(key=operator.itemgetter(1))
     neighbors = []
