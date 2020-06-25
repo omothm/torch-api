@@ -46,21 +46,21 @@ class ColorDetectionService(Service):
             img_file.write(image_obj)
 
         objects = self.frame.get_objects_with_frames(temp_image_filename)
-        prediction = []
+        prediction = ''
 
         try:
             if not objects:
                 histogram_of_test_image(temp_image_filename)
-                prediction.append({"prediction": classify(
-                    'training.data', 'test.data'), "object_name": "object could not detect"})
+                prediction += str(classify('training.data','test.data'))
             else:
                 frames = list(map(lambda x: x['frames'], objects))
                 object_names = list(map(lambda x: x['object_name'], objects))
 
                 for i in range(len(frames)):
                     histogram_of_test_image(temp_image_filename, frames[i])
-                    prediction.append({"prediction": classify(
-                        'training.data', 'test.data'), "object_name": object_names[i]})
+                    prediction += str(classify('training.data', 'test.data'))+' '+str(object_names[i])
+                    if i != len(frames) - 1:
+                        prediction+=','
 
             os.remove(temp_image_filename)
             return str(prediction), 1
