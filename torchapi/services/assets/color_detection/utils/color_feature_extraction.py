@@ -10,7 +10,7 @@ def histogram_of_test_image(test_image,frame=None):
     if frame is None:
         feature_data = __calculate_histogram(image)
     else:
-        im_width, im_height,_ = image.shape
+        im_height,im_width,_ = image.shape
         ymin, xmin, ymax, xmax = frame
         feature_data = __calculate_histogram(image[(int) (ymin * im_height):(int)(ymax * im_height) ,(int)(xmin * im_width):(int)(xmax * im_width)])
     
